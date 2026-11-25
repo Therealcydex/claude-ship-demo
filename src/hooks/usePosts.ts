@@ -8,6 +8,12 @@ export type PostsState =
 
 export function usePosts(page: number, pageSize: number): PostsState {
   const [state, setState] = useState<PostsState>({ status: "loading" });
+  const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    const refresh = () => setVersion((v) => v + 1);
+    window.addEventListener("focus", refresh);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -18,7 +24,7 @@ export function usePosts(page: number, pageSize: number): PostsState {
         setState({ status: "error", error: err instanceof Error ? err.message : String(err) });
       });
     return () => controller.abort();
-  }, [page, pageSize]);
+  }, [page, pageSize, version]);
 
   return state;
 }
