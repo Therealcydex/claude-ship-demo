@@ -10,7 +10,7 @@ export function App() {
     <main>
       <header>
         <h1>Post Browser</h1>
-        <p className="tagline">Browse the lastest posts from JSONPlaceholder.</p>
+        <p className="tagline">Browse the latest posts from JSONPlaceholder.</p>
         {session && (
           <p>
             Signed in as {session.user}{" "}
