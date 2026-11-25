@@ -1,0 +1,15 @@
+version: 1
+mode: observe
+rules:
+  - purpose: "Routine changes take two people. When Claude's review passes, one is enough and Claude approves."
+    paths: ["**"]
+    verdict: { claude: comments, seats: 2 }
+    override:
+      - { if: "claude/code_review = pass", verdict: { claude: approves, seats: 1 } }
+  - purpose: "Sign-in code always needs a human reviewer who isn't the author."
+    paths: ["src/auth/**"]
+    verdict: { claude: comments, seats: [{ count: 1, from: [humans, "!pr/authors"] }] }
+  - purpose: "A change to the review rules takes two people."
+    paths: ["**/.claude/**"]
+    nested: inherit
+    verdict: { claude: comments, seats: 2 }
