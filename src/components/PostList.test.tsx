@@ -12,8 +12,12 @@ function makePosts(page: number): Post[] {
 
 function mockApi(total: number) {
   return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
-    const page = Number(new URL(String(input)).searchParams.get("_page"));
-    return new Response(JSON.stringify(makePosts(page)), {
+    const params = new URL(String(input)).searchParams;
+    const query = params.get("q");
+    const body = query
+      ? [{ id: 99, userId: 1, title: `Match for ${query}`, body: "..." }]
+      : makePosts(Number(params.get("_page")));
+    return new Response(JSON.stringify(body), {
       headers: { "content-type": "application/json", "x-total-count": String(total) },
     });
   });
@@ -37,6 +41,17 @@ describe("PostList", () => {
 
     expect(await screen.findByText("Post 11")).toBeTruthy();
     expect(screen.getByText("Page 2 of 3")).toBeTruthy();
+  });
+
+  it("shows search results for a query", async () => {
+    mockApi(30);
+    render(<PostList />);
+    await screen.findByText("Post 1");
+
+    await userEvent.type(screen.getByRole("searchbox", { name: "Search posts" }), "qui");
+
+    expect(await screen.findByText('1 result for "Qui"')).toBeTruthy();
+    expect(screen.getByText("Match for qui")).toBeTruthy();
   });
 
   it("shows an error when the request fails", async () => {

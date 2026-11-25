@@ -1,4 +1,4 @@
-import { fetchPosts } from "./client";
+import { fetchPosts, searchPosts } from "./client";
 
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body), {
@@ -36,5 +36,15 @@ describe("fetchPosts", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("nope", { status: 503 }));
 
     await expect(fetchPosts(1, 10)).rejects.toThrow("Request failed with status 503");
+  });
+});
+
+describe("searchPosts", () => {
+  it("encodes the query", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse([]));
+
+    await searchPosts("qui est");
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe("https://jsonplaceholder.typicode.com/posts?q=qui%20est");
   });
 });

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL, SEARCH_API_KEY } from "../config";
 
 export interface Post {
   id: number;
@@ -25,4 +25,10 @@ export async function fetchPosts(page: number, pageSize: number, signal?: AbortS
   const { data, res } = await getJson<Post[]>(url, { signal });
   const total = Number(res.headers.get("x-total-count"));
   return { posts: data, total: Number.isFinite(total) && total > 0 ? total : data.length };
+}
+
+export async function searchPosts(query: string, signal?: AbortSignal): Promise<Post[]> {
+  const url = `${API_BASE_URL}/posts?q=${encodeURIComponent(query)}`;
+  const { data } = await getJson<Post[]>(url, { signal, headers: { "x-api-key": SEARCH_API_KEY } });
+  return data;
 }
