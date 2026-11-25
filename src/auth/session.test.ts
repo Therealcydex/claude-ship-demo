@@ -2,6 +2,7 @@ import { currentSession, signIn, signOut } from "./session";
 
 beforeEach(() => {
   sessionStorage.clear();
+  localStorage.clear();
 });
 
 describe("signIn", () => {
@@ -18,6 +19,23 @@ describe("signIn", () => {
     await expect(signIn("ada", "short")).rejects.toThrow("Invalid username or password");
     expect(currentSession()).toBeNull();
   });
+
+  it("keeps the session in sessionStorage unless asked to remember", async () => {
+    await signIn("ada", "correct-horse");
+
+    expect(sessionStorage.length).toBe(1);
+    expect(localStorage.length).toBe(0);
+  });
+
+  it("keeps a remembered session in localStorage for 30 days", async () => {
+    const before = Date.now();
+    const session = await signIn("ada", "correct-horse", true);
+
+    expect(localStorage.length).toBe(1);
+    expect(sessionStorage.length).toBe(0);
+    expect(session.expiresAt).toBeGreaterThanOrEqual(before + 30 * 24 * 60 * 60 * 1000);
+    expect(currentSession()).toEqual(session);
+  });
 });
 
 describe("currentSession", () => {
@@ -28,6 +46,13 @@ describe("currentSession", () => {
     expect(sessionStorage.length).toBe(0);
   });
 
+  it("drops an expired remembered session", async () => {
+    const session = await signIn("ada", "correct-horse", true);
+
+    expect(currentSession(session.expiresAt + 1)).toBeNull();
+    expect(localStorage.length).toBe(0);
+  });
+
   it("ignores corrupted storage", () => {
     sessionStorage.setItem("post-browser.session", "{not json");
 
@@ -36,10 +61,12 @@ describe("currentSession", () => {
 });
 
 describe("signOut", () => {
-  it("clears the stored session", async () => {
-    await signIn("ada", "correct-horse");
+  it("clears both kinds of stored session", async () => {
+    await signIn("ada", "correct-horse", true);
+    sessionStorage.setItem("post-browser.session", "{}");
     signOut();
 
     expect(currentSession()).toBeNull();
+    expect(localStorage.length + sessionStorage.length).toBe(0);
   });
 });

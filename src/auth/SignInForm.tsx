@@ -8,6 +8,7 @@ interface Props {
 export function SignInForm({ onSignedIn }: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -16,7 +17,7 @@ export function SignInForm({ onSignedIn }: Props) {
     setBusy(true);
     setError(null);
     try {
-      onSignedIn(await signIn(username, password));
+      onSignedIn(await signIn(username, password, remember));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed");
       setBusy(false);
@@ -37,6 +38,10 @@ export function SignInForm({ onSignedIn }: Props) {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
         />
+      </label>
+      <label>
+        <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+        Remember me for 30 days
       </label>
       {error && <p role="alert">{error}</p>}
       <button type="submit" disabled={busy}>
