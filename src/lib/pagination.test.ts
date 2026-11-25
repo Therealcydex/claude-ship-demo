@@ -1,4 +1,4 @@
-import { clampPage, pageCount } from "./pagination";
+import { clampPage, hasNextPage, pageCount } from "./pagination";
 
 describe("pageCount", () => {
   it("rounds partial pages up", () => {
@@ -23,5 +23,16 @@ describe("clampPage", () => {
     expect(clampPage(0, 100, 10)).toBe(1);
     expect(clampPage(4, 100, 10)).toBe(4);
     expect(clampPage(42, 100, 10)).toBe(10);
+  });
+});
+
+describe("hasNextPage", () => {
+  it("is true while more posts remain", () => {
+    expect(hasNextPage(1, 10, 25)).toBe(true);
+    expect(hasNextPage(2, 10, 25)).toBe(true);
+  });
+
+  it("is false on the last page", () => {
+    expect(hasNextPage(3, 10, 25)).toBe(false);
   });
 });

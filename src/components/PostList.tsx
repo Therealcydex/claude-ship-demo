@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PAGE_SIZE } from "../config";
 import { usePosts } from "../hooks/usePosts";
-import { pageCount } from "../lib/pagination";
+import { hasNextPage, pageCount } from "../lib/pagination";
 
 export function PostList() {
   const [page, setPage] = useState(1);
@@ -33,7 +33,7 @@ export function PostList() {
         <span>
           Page {page} of {pages}
         </span>
-        <button onClick={() => setPage((p) => p + 1)} disabled={page >= pages}>
+        <button onClick={() => setPage((p) => p + 1)} disabled={!hasNextPage(page, PAGE_SIZE, state.total)}>
           Next
         </button>
       </nav>

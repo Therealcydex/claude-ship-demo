@@ -6,3 +6,7 @@ export function pageCount(total: number, pageSize: number): number {
 export function clampPage(page: number, total: number, pageSize: number): number {
   return Math.min(Math.max(1, Math.trunc(page)), pageCount(total, pageSize));
 }
+
+export function hasNextPage(page: number, pageSize: number, total: number): boolean {
+  return page * pageSize <= total;
+}
